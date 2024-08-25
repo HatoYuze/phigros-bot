@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.github.hatoyuze"
-version = "0.1.0"
+version = "0.2.0"
 
 repositories {
     if (System.getenv("CI")?.toBoolean() != true) {
@@ -24,4 +24,6 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
+    implementation("org.apache.commons:commons-text:1.12.0")
+
 }

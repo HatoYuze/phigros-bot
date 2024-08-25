@@ -2,6 +2,7 @@ package com.github.hatoyuze
 
 import com.github.hatoyuze.mirai.data.GlobalUserData
 import com.github.hatoyuze.mirai.command.PhiCommand
+import com.github.hatoyuze.mirai.data.AliasLibrary
 import com.github.hatoyuze.mirai.data.PhigrosSongData
 import kotlinx.serialization.json.Json
 import net.mamoe.mirai.console.command.CommandManager
@@ -21,6 +22,7 @@ object PhigrosBot: KotlinPlugin(
         super.onEnable()
         CommandManager.registerCommand(PhiCommand)
         GlobalUserData.reload()
+        AliasLibrary.reload().also { AliasLibrary.alias }
     }
 
     private val json = Json {

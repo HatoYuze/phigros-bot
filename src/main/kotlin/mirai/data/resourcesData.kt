@@ -14,6 +14,11 @@ data class PhigrosSongData(
     val previewTimeTo: Double,
     val charts: List<PhigrosSongChartData>
 ) {
+    fun addAlias(newAlias: String) = AliasLibrary.alias.compute(sid) { _, v ->
+        v?.add(newAlias)
+        v ?: mutableSetOf(newAlias)
+    }
+    fun queryAliases() = AliasLibrary.alias[sid] ?: mutableSetOf()
     companion object{
         fun getSongDataBySid(sid: String): PhigrosSongData? {
             return PhigrosBot.SONGS_DATABASE.find { it.sid == sid }

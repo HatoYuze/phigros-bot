@@ -20,7 +20,7 @@ class PhigrosApiTest {
     fun playData() {
         runBlocking {
             println(
-                PhigrosApiImpl.playSaveImpl(sessionToken)
+                PhigrosApiImpl.entryData(sessionToken).savePlayScore
             )
         }
     }
