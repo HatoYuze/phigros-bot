@@ -8,18 +8,47 @@ import kotlinx.serialization.json.Json
 import net.mamoe.mirai.console.command.CommandManager
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
+import java.io.File
 
 object PhigrosBot: KotlinPlugin(
     JvmPluginDescription(
-        id = "com.github.hatoyuze",
+        id = "com.github.hatoyuze.phigros-bot",
         name = "phigros-bot",
-        version = "0.1.0"
+        version = "0.3.0"
     ) {
         author("HatoYuze & Rosemoe")
     }
 ) {
+    private fun migrateConfigDataId() {
+        fun moveFiles(origin: Array<File>) {
+            for (dataFile in origin) {
+                if (dataFile.isDirectory) {
+                    moveFiles(dataFile.listFiles()!!)
+                    dataFile.delete()
+                    continue
+                }
+                val target = dataFolder.resolve(dataFile.name)
+                if (target.exists() && target.length() > dataFile.length()) continue
+                dataFile.copyTo(target, true)
+                dataFile.delete()
+            }
+        }
+        val data = dataFolder.parentFile.resolve("com.github.hatoyuze")
+        if (!data.exists()) {
+            return
+        }
+        logger.info("发现了残余的旧配置文件, 正在迁移中...")
+        val config = configFolder.parentFile.resolve("com.github.hatoyuze")
+        dataFolder.mkdirs()
+        config.mkdirs()
+        moveFiles(data.listFiles()!!).also { data.delete() }
+        moveFiles(config.listFiles()!!).also { config.delete() }
+        logger.info("迁移文件成功！")
+    }
+
     override fun onEnable() {
         super.onEnable()
+        migrateConfigDataId()
         CommandManager.registerCommand(PhiCommand)
         GlobalUserData.reload()
         GlobalAliasLibrary.reload().also {
