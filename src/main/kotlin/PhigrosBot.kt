@@ -22,7 +22,14 @@ object PhigrosBot: KotlinPlugin(
         super.onEnable()
         CommandManager.registerCommand(PhiCommand)
         GlobalUserData.reload()
-        GlobalAliasLibrary.reload().also { GlobalAliasLibrary.alias }
+        GlobalAliasLibrary.reload().also {
+            if (GlobalAliasLibrary.alias.isEmpty()) {
+                PhigrosBot.getResource("phi/alias.json")!!.let { Json.decodeFromString<MutableMap<String, MutableSet<String>>>(it) }.forEach { (k, v) ->
+                    GlobalAliasLibrary.alias[k] = v
+                }
+            }
+            logger.info("成功获取 ${GlobalAliasLibrary.alias.values.sumOf { it.size }} 个别名！")
+        }
         GithubDownloadProxy.reload()
         logger.info("更新配置文件成功")
 
