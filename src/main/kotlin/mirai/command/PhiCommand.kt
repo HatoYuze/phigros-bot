@@ -101,7 +101,10 @@ object PhiCommand : CompositeCommand(
             }
             append("本曲对应 sid 为 ${result.sid}")
         }
-        quote(resultInfo + image(searchSongWithAlias.first().getIllustration()))
+        sendMessage {
+            +resultInfo
+            +image(searchSongWithAlias.first().getIllustration())
+        }
     }
 
     @SubCommand("b19")
