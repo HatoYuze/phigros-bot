@@ -9,7 +9,7 @@ import net.mamoe.mirai.console.data.value
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.text.similarity.LevenshteinDistance
 
-object AliasLibrary : AutoSavePluginConfig("aliases") {
+object GlobalAliasLibrary : AutoSavePluginConfig("aliases") {
     @ValueDescription("用于调整曲名匹配的灵敏度\n数值越小则代表匹配时越为灵敏")
     private val sensitivity by value<Double>(0.4)
 

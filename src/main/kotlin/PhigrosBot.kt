@@ -22,7 +22,7 @@ object PhigrosBot: KotlinPlugin(
         super.onEnable()
         CommandManager.registerCommand(PhiCommand)
         GlobalUserData.reload()
-        AliasLibrary.reload().also { AliasLibrary.alias }
+        GlobalAliasLibrary.reload().also { GlobalAliasLibrary.alias }
         GithubDownloadProxy.reload()
         logger.info("更新配置文件成功")
 

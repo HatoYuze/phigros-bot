@@ -1,7 +1,7 @@
 package com.github.hatoyuze.mirai.command
 
 import com.github.hatoyuze.PhigrosBot
-import com.github.hatoyuze.mirai.data.AliasLibrary
+import com.github.hatoyuze.mirai.data.GlobalAliasLibrary
 import com.github.hatoyuze.mirai.data.GlobalUserData
 import com.github.hatoyuze.mirai.data.PhigrosLevel
 import com.github.hatoyuze.mirai.game.PhigrosBest19Result
@@ -49,11 +49,11 @@ object PhiCommand : CompositeCommand(
 
     @SubCommand("addAlias", "aa")
     suspend fun addAlias(commandContext: CommandContext, song: String, newAlias: String): Unit = commandContext.run cmd@{
-        if (!AliasLibrary.isNormalUserAllowed && !sender.hasPermission(RootPermission)) {
+        if (!GlobalAliasLibrary.isNormalUserAllowed && !sender.hasPermission(RootPermission)) {
             quote("当前规定了无法添加别名！\n您无法通过指令添加别名，请联系机器人所有者！")
             return@cmd
         }
-        val searchSongWithAlias = AliasLibrary.searchSongWithAlias(song)
+        val searchSongWithAlias = GlobalAliasLibrary.searchSongWithAlias(song)
         if (searchSongWithAlias.isEmpty()) {
             quote("没有找到名称为 $song 的可用歌曲哦！\n请尝试输入全称")
             return@cmd
@@ -72,7 +72,7 @@ object PhiCommand : CompositeCommand(
 
     @SubCommand("alias")
     suspend fun alias(commandContext: CommandContext, alias: String): Unit = commandContext.run {
-        val searchSongWithAlias = AliasLibrary.searchSongWithAlias(alias)
+        val searchSongWithAlias = GlobalAliasLibrary.searchSongWithAlias(alias)
         if (searchSongWithAlias.isEmpty()) {
             quote("没有找到名称为 $alias 的歌曲！")
             return
@@ -141,7 +141,7 @@ object PhiCommand : CompositeCommand(
             quote("您没有绑定 sessionToken 哦！\n请使用指令绑定 ->/phi bind 您的sessionToken")
             return
         }
-        val songData = AliasLibrary.searchSongWithAlias(title).firstOrNull() ?: kotlin.run {
+        val songData = GlobalAliasLibrary.searchSongWithAlias(title).firstOrNull() ?: kotlin.run {
             quote("没有找到歌名为 $title 的歌曲哦！ 请尝试输入全名！")
             return
         }
