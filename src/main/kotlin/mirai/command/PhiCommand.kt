@@ -1,7 +1,7 @@
 package com.github.hatoyuze.mirai.command
 
 import com.github.hatoyuze.PhigrosBot
-import com.github.hatoyuze.mirai.data.AliasLibrary
+import com.github.hatoyuze.mirai.data.GlobalAliasLibrary
 import com.github.hatoyuze.mirai.data.GlobalUserData
 import com.github.hatoyuze.mirai.data.PhigrosLevel
 import com.github.hatoyuze.mirai.game.PhigrosBest19Result
@@ -13,10 +13,10 @@ import net.mamoe.mirai.console.command.CompositeCommand
 import net.mamoe.mirai.console.permission.PermissionService.Companion.hasPermission
 import net.mamoe.mirai.console.permission.RootPermission
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
+import net.mamoe.mirai.message.data.*
 import net.mamoe.mirai.message.data.MessageSource.Key.quote
-import net.mamoe.mirai.message.data.PlainText
-import net.mamoe.mirai.message.data.buildForwardMessage
-import net.mamoe.mirai.message.data.buildMessageChain
+import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
+import java.io.File
 import com.github.hatoyuze.mirai.data.GlobalUserData as bindings
 
 object PhiCommand : CompositeCommand(
@@ -48,31 +48,36 @@ object PhiCommand : CompositeCommand(
     }
 
     @SubCommand("addAlias", "aa")
-    suspend fun addAlias(commandContext: CommandContext, song: String, newAlias: String): Unit = commandContext.run cmd@{
-        if (!AliasLibrary.isNormalUserAllowed && !sender.hasPermission(RootPermission)) {
-            quote("当前规定了无法添加别名！\n您无法通过指令添加别名，请联系机器人所有者！")
-            return@cmd
+    suspend fun addAlias(commandContext: CommandContext, song: String, newAlias: String): Unit =
+        commandContext.run cmd@{
+            if (!GlobalAliasLibrary.isNormalUserAllowed && !sender.hasPermission(RootPermission)) {
+                quote("当前规定了无法添加别名！\n您无法通过指令添加别名，请联系机器人所有者！")
+                return@cmd
+            }
+            val searchSongWithAlias = GlobalAliasLibrary.searchSongWithAlias(song)
+            if (searchSongWithAlias.isEmpty()) {
+                quote("没有找到名称为 $song 的可用歌曲哦！\n请尝试输入全称")
+                return@cmd
+            }
+            if (searchSongWithAlias.size > 1) {
+                quote("找到多个解析项，无法确定所要增加别名的对象\n${searchSongWithAlias.joinToString { "${it.title}(${it.sid})" }}\n请尝试使用 sid 添加别名\n例如: Another Me(kalpa) 则可使用 'AnotherMe.DAAN' 代替")
+                return@cmd
+            }
+            val obj = searchSongWithAlias.first()
+            obj.addAlias(newAlias) ?: run {
+                quote("意料之外的错误，暂时无法添加别名!")
+                return@cmd
+            }
+            quote(
+                "成功为歌曲 #${obj.title} (sid=${obj.sid}) 添加别名\n该歌曲目前拥有以下别名:\n${
+                    obj.queryAliases().joinToString(limit = 15) { it }
+                }"
+            )
         }
-        val searchSongWithAlias = AliasLibrary.searchSongWithAlias(song)
-        if (searchSongWithAlias.isEmpty()) {
-            quote("没有找到名称为 $song 的可用歌曲哦！\n请尝试输入全称")
-            return@cmd
-        }
-        if (searchSongWithAlias.size > 1) {
-            quote("找到多个解析项，无法确定所要增加别名的对象\n${searchSongWithAlias.joinToString { "${it.title}(${it.sid})" }}\n请尝试使用 sid 添加别名\n例如: Another Me(kalpa) 则可使用 'AnotherMe.DAAN' 代替")
-            return@cmd
-        }
-        val obj = searchSongWithAlias.first()
-        obj.addAlias(newAlias) ?: run {
-            quote("意料之外的错误，暂时无法添加别名!")
-            return@cmd
-        }
-        quote("成功为歌曲 #${obj.title} (sid=${obj.sid}) 添加别名\n该歌曲目前拥有以下别名:\n${obj.queryAliases().joinToString(limit = 15) { it }}")
-    }
 
     @SubCommand("alias")
     suspend fun alias(commandContext: CommandContext, alias: String): Unit = commandContext.run {
-        val searchSongWithAlias = AliasLibrary.searchSongWithAlias(alias)
+        val searchSongWithAlias = GlobalAliasLibrary.searchSongWithAlias(alias)
         if (searchSongWithAlias.isEmpty()) {
             quote("没有找到名称为 $alias 的歌曲！")
             return
@@ -96,7 +101,7 @@ object PhiCommand : CompositeCommand(
             }
             append("本曲对应 sid 为 ${result.sid}")
         }
-        quote(resultInfo)
+        quote(resultInfo + image(searchSongWithAlias.first().getIllustration()))
     }
 
     @SubCommand("b19")
@@ -141,7 +146,7 @@ object PhiCommand : CompositeCommand(
             quote("您没有绑定 sessionToken 哦！\n请使用指令绑定 ->/phi bind 您的sessionToken")
             return
         }
-        val songData = AliasLibrary.searchSongWithAlias(title).firstOrNull() ?: kotlin.run {
+        val songData = GlobalAliasLibrary.searchSongWithAlias(title).firstOrNull() ?: kotlin.run {
             quote("没有找到歌名为 $title 的歌曲哦！ 请尝试输入全名！")
             return
         }
@@ -157,14 +162,14 @@ object PhiCommand : CompositeCommand(
         val scores = phigrosUser.playScore.scores.filter {
             it.sid == songData.sid
         }
-        quote(
-            """
+        sendMessage {
+            +"""
             |【${songData.title}】 by ${songData.composer}
             |  sid: ${songData.sid} 
             |游玩记录：
-            | ${scores.joinToString("\n") { it.info() }.ifEmpty { "暂无游玩记录！" }}
-        """.trimMargin()
-        )
+            | ${scores.joinToString("\n") { it.info() }.ifEmpty { "暂无游玩记录！" }}""".trimMargin()
+            +image(songData.getIllustration())
+        }
     }
 
     @OptIn(ConsoleExperimentalApi::class)
@@ -204,6 +209,21 @@ suspend fun CommandContext.quote(msg: String) {
     this.sender.sendMessage(
         PlainText(msg).plus(originalMessage.quote())
     )
+}
+
+suspend inline fun CommandContext.sendMessage(block: MessageChainBuilder.() -> Unit) {
+    val messageChain = buildMessageChain(block)
+    if (sender.subject == null) {
+        sender.sendMessage(messageChain.content)
+    } else {
+        sender.subject!!.sendMessage(messageChain)
+    }
+}
+
+suspend fun CommandContext.image(file: File): Message {
+    return file.toExternalResource().use {
+        sender.subject?.uploadImage(it) ?: PlainText("Image { ${file.name} }")
+    }
 }
 
 suspend fun CommandContext.sendForwardMessage(vararg message: String) {

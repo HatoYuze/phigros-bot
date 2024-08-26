@@ -1,9 +1,9 @@
 package com.github.hatoyuze
 
-import com.github.hatoyuze.mirai.data.GlobalUserData
 import com.github.hatoyuze.mirai.command.PhiCommand
-import com.github.hatoyuze.mirai.data.AliasLibrary
-import com.github.hatoyuze.mirai.data.PhigrosSongData
+import com.github.hatoyuze.mirai.data.*
+import com.github.hatoyuze.mirai.data.GithubDataUpdater.Companion.IllustrationUpdater
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import net.mamoe.mirai.console.command.CommandManager
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
@@ -22,7 +22,22 @@ object PhigrosBot: KotlinPlugin(
         super.onEnable()
         CommandManager.registerCommand(PhiCommand)
         GlobalUserData.reload()
-        AliasLibrary.reload().also { AliasLibrary.alias }
+        GlobalAliasLibrary.reload().also {
+            if (GlobalAliasLibrary.alias.isEmpty()) {
+                PhigrosBot.getResource("phi/alias.json")!!.let { Json.decodeFromString<MutableMap<String, MutableSet<String>>>(it) }.forEach { (k, v) ->
+                    GlobalAliasLibrary.alias[k] = v
+                }
+            }
+            logger.info("成功获取 ${GlobalAliasLibrary.alias.values.sumOf { it.size }} 个别名！")
+        }
+        GithubDownloadProxy.reload()
+        logger.info("更新配置文件成功")
+
+        logger.info("正在检查曲绘更新列表...")
+        runBlocking {
+            IllustrationUpdater.update()
+        }
+        logger.info("更新曲绘成功")
     }
 
     private val json = Json {

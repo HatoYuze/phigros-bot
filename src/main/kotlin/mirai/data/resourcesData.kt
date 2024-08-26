@@ -14,11 +14,16 @@ data class PhigrosSongData(
     val previewTimeTo: Double,
     val charts: List<PhigrosSongChartData>
 ) {
-    fun addAlias(newAlias: String) = AliasLibrary.alias.compute(sid) { _, v ->
+    fun addAlias(newAlias: String) = GlobalAliasLibrary.alias.compute(sid) { _, v ->
         v?.add(newAlias)
         v ?: mutableSetOf(newAlias)
     }
-    fun queryAliases() = AliasLibrary.alias[sid] ?: mutableSetOf()
+    fun queryAliases() = GlobalAliasLibrary.alias[sid] ?: mutableSetOf()
+
+    fun getIllustration() =
+        PhigrosBot.dataFolder.resolve("Illustration").resolve("$sid.png")
+            .also { if (!it.exists()) throw IllegalStateException("没有找到歌曲 $sid 对应的曲绘") }
+
     companion object{
         fun getSongDataBySid(sid: String): PhigrosSongData? {
             return PhigrosBot.SONGS_DATABASE.find { it.sid == sid }
