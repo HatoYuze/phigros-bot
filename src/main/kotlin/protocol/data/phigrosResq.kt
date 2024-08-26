@@ -36,8 +36,9 @@ data class PhigrosSaveResultGameFileResp(
 
 @Serializable
 data class PhigrosSaveResultFileMetaDataResp(
+    // NOTE: 仅在用户的第一个存档对象(index[0])存在
     @SerialName("_checksum")
-    val checksum: String,
+    val checksum: String? = null,
     val size: Int
 )
 

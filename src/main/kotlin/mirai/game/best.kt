@@ -113,15 +113,15 @@ object PhigrosTool{
     fun getB19(phigrosUser: PhigrosUser): PhigrosBest19Result {
         val gameSave = GameSave.new(phigrosUser)
         val bests = computeBests(gameSave)
-        val phiList  = bests.filter { it.score.score == 100_0000 && it.score.achievement == 100.0 }
+        val phiList  = bests.filter { it.score.score == 100_0000 && it.score.achievement == 100.0 }.sortedBy { -it.rating }
         val phi1 = phiList.firstOrNull()
         val best19 = bests.take(19)
         val newRks = (best19.sumOf { it.rating } + (phi1?.rating ?: 0.0)) / 20
         return PhigrosBest19Result(
             gameSave.playerName,
             newRks,
-            best19 = best19,
-            phi1 = phi1,
+            best19 = bests.subListOrEmpty(0,18),
+            phi1 = phiList.firstOrNull(),
             bestExtended3 = bests.subListOrEmpty(19, 23),
             phiExtended3 = phiList.subListOrEmpty(1,4)
         )

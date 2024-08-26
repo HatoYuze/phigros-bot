@@ -1,12 +1,11 @@
 package com.github.hatoyuze.protocol.api
 
 import com.github.hatoyuze.protocol.data.*
- import com.github.hatoyuze.protocol.data.PhigrosZipDataImpl.Companion.wrap
- import com.github.hatoyuze.protocol.data.PhigrosZipDataImpl.Companion.get
- import com.github.hatoyuze.protocol.data.PhigrosSaveZipFileEntry.Companion.nameOfEntry
+import com.github.hatoyuze.protocol.data.PhigrosSaveZipFileEntry.Companion.nameOfEntry
+import com.github.hatoyuze.protocol.data.PhigrosZipDataImpl.Companion.get
+import com.github.hatoyuze.protocol.data.PhigrosZipDataImpl.Companion.wrap
 import com.github.hatoyuze.protocol.net.Network
 import com.github.hatoyuze.protocol.net.PhigrosFeature
-
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
@@ -14,10 +13,11 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.util.*
-
 import kotlinx.serialization.json.Json
 import java.io.ByteArrayOutputStream
 import java.security.MessageDigest
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import javax.crypto.Cipher
@@ -26,6 +26,7 @@ import javax.crypto.spec.SecretKeySpec
 
 private val net = Network("https://rak3ffdi.cloud.tds1.tapapis.cn/1.1") {
     install(PhigrosFeature)
+
 }
 
 internal object PhigrosApiImpl {
@@ -35,7 +36,11 @@ internal object PhigrosApiImpl {
 
 
     suspend fun entryData(sessionToken: String): ResolvedPhigrosGameSaveResp {
-        val resp0 =  playSaveImpl(sessionToken).results.first()
+        // Note: 部分使用者可能有多个存档返回，此处选择其上传时间最近的一项
+        val resp0 = playSaveImpl(sessionToken).results.maxByOrNull {
+            ZonedDateTime.parse(it.updatedAt, ResolvedPhigrosGameSaveResp.TIME_STRING_FORMATTER)
+                .withZoneSameInstant(ZoneId.systemDefault()).toInstant().epochSecond
+        }!!
         val gameFile = resp0.gameFile
         val data = resolveSave(
             gameFile.url,
