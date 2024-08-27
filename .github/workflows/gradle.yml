@@ -36,11 +36,14 @@ jobs:
       - name: Build Plugin with mirai
         run: ./gradlew buildPlugin
         
+      - name: Build Plugin with mirai
+        run: ./gradlew buildPluginLegary
+        
       - name: Upload result
         uses: actions/upload-artifact@v2
         with:
          name: phigros-bot
-         path: build/mirai/maimai-bot-*.jar
+         path: build/mirai/phigros-bot-*.jar
 
 
   dependency-submission:
