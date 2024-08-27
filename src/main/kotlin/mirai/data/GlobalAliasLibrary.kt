@@ -28,7 +28,7 @@ object GlobalAliasLibrary : AutoSavePluginConfig("aliases") {
         return SONGS_DATABASE.filter {
             if (name == it.sid) return listOf(it)
             val aliases = alias[it.sid] ?: return@filter it.title == name
-            name in aliases ||
+            aliases.any { alias -> alias.equals(name, true) } ||
                 matchRateByLevenshtein(it.title, name) // Note: sid 就是 title 多了曲师的描述，这里就不用追加比较了
         }
     }

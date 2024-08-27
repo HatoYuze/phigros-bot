@@ -75,7 +75,7 @@ object PhigrosBot: KotlinPlugin(
 
     val SONGS_DATABASE: List<PhigrosSongData> by lazy {
         json.decodeFromString<List<PhigrosSongData>>(
-            getResource("phi/music-info.json")!!
+            getResource("phi/song_info.json")!!
         )
     }
 }

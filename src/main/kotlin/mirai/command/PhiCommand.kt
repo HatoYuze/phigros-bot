@@ -93,11 +93,13 @@ object PhiCommand : CompositeCommand(
         }
         val resultInfo = buildString {
             val result = searchSongWithAlias.first()
-            appendLine("【${result.title}】")
+            appendLine("⌈${result.source}⌋ 【${result.title}】")
             appendLine(" 艺术家: ${result.composer} 曲绘作者: ${result.illustrator}")
+            appendLine(" 章节: ${result.chapter}")
+            appendLine(" Bpm: ${result.bpmDescription}")
             appendLine("-------")
             result.charts.forEach {
-                appendLine("【${it.level}】 定数: ${it.rating} 谱师：${it.charter}")
+                appendLine("【${it.level}】 定数: ${it.rating} 谱师：${it.charter} Notes: ${it.notes}")
             }
             append("本曲对应 sid 为 ${result.sid}")
         }
@@ -168,6 +170,7 @@ object PhiCommand : CompositeCommand(
         sendMessage {
             +"""
             |【${songData.title}】 by ${songData.composer}
+            |  章节: ${songData.chapter} bpm:${songData.bpmDescription}
             |  sid: ${songData.sid} 
             |游玩记录：
             | ${scores.joinToString("\n") { it.info() }.ifEmpty { "暂无游玩记录！" }}""".trimMargin()
