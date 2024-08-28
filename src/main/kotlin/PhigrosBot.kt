@@ -6,6 +6,7 @@ import com.github.hatoyuze.mirai.data.GithubDataUpdater.Companion.IllustrationUp
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import net.mamoe.mirai.console.command.CommandManager
+import net.mamoe.mirai.console.extension.PluginComponentStorage
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import java.io.File
@@ -19,6 +20,10 @@ object PhigrosBot: KotlinPlugin(
         author("HatoYuze & Rosemoe")
     }
 ) {
+    override fun PluginComponentStorage.onLoad() {
+        System.setProperty("phigros-bot.cache", dataFolder.absolutePath)
+    }
+
     private fun migrateConfigDataId() {
         fun moveFiles(origin: Array<File>) {
             for (dataFile in origin) {

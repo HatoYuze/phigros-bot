@@ -23,12 +23,14 @@ object GlobalAliasLibrary : AutoSavePluginConfig("aliases") {
     }
 
 
-
     fun searchSongWithAlias(name: String): List<PhigrosSongData> {
         return SONGS_DATABASE.filter {
-            if (name == it.sid) return listOf(it)
+            if (name.equals(it.sid, true)) return listOf(it)
+            if (name.length >= 2 && it.title.startsWith(name)) {
+                return@filter true
+            }
             val aliases = alias[it.sid] ?: return@filter it.title == name
-            aliases.any { alias -> alias.equals(name, true) } ||
+            aliases.any { alias -> alias.startsWith(name, true) } ||
                 matchRateByLevenshtein(it.title, name) // Note: sid 就是 title 多了曲师的描述，这里就不用追加比较了
         }
     }

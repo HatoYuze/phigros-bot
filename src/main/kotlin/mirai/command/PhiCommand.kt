@@ -75,7 +75,7 @@ object PhiCommand : CompositeCommand(
             )
         }
 
-    @SubCommand("alias")
+    @SubCommand("alias","song")
     suspend fun alias(commandContext: CommandContext, alias: String): Unit = commandContext.run {
         val searchSongWithAlias = GlobalAliasLibrary.searchSongWithAlias(alias)
         if (searchSongWithAlias.isEmpty()) {
@@ -93,19 +93,23 @@ object PhiCommand : CompositeCommand(
         }
         val resultInfo = buildString {
             val result = searchSongWithAlias.first()
-            appendLine("⌈${result.source}⌋ 【${result.title}】")
-            appendLine(" 艺术家: ${result.composer} 曲绘作者: ${result.illustrator}")
+            appendLine("* ⌈${result.source}⌋")
+            appendLine("【${result.title}】")
+            appendLine(" 艺术家: ${result.composer}")
+            appendLine(" 曲绘: ${result.illustrator}")
             appendLine(" 章节: ${result.chapter}")
             appendLine(" Bpm: ${result.bpmDescription}")
             appendLine("-------")
             result.charts.forEach {
                 appendLine("【${it.level}】 定数: ${it.rating} 谱师：${it.charter} Notes: ${it.notes}")
             }
-            append("本曲对应 sid 为 ${result.sid}")
+            appendLine()
+            append("sid: ${result.sid}")
         }
         sendMessage {
             +resultInfo
             +image(searchSongWithAlias.first().getIllustration())
+            +originalMessage.quote()
         }
     }
 
@@ -170,12 +174,22 @@ object PhiCommand : CompositeCommand(
         sendMessage {
             +"""
             |【${songData.title}】 by ${songData.composer}
-            |  章节: ${songData.chapter} bpm:${songData.bpmDescription}
+            |  章节: ${songData.chapter} bpm: ${songData.bpmDescription}
             |  sid: ${songData.sid} 
             |游玩记录：
             | ${scores.joinToString("\n") { it.info() }.ifEmpty { "暂无游玩记录！" }}""".trimMargin()
             +image(songData.getIllustration())
+            +originalMessage.quote()
         }
+    }
+
+    @SubCommand("guessColor", "gc")
+    suspend fun guessColor(commandContext: CommandContext) = commandContext.run {
+        val phigrosColorBlockGame = PhigrosColorBlockGame.new(this, sender.subject ?: PhigrosBot) ?: kotlin.run {
+            quote("本群聊已经开启了一场游戏哦!\n请稍后本场游戏结束后再试")
+            return
+        }
+        phigrosColorBlockGame.start(this)
     }
 
     @OptIn(ConsoleExperimentalApi::class)
@@ -212,9 +226,13 @@ object PhiCommand : CompositeCommand(
 
 val CommandContext.senderId get() = sender.user?.id ?: -1
 suspend fun CommandContext.quote(msg: String) {
-    this.sender.sendMessage(
-        PlainText(msg).plus(originalMessage.quote())
-    )
+    try {
+        this.sender.sendMessage(
+            PlainText(msg).plus(originalMessage.quote())
+        )
+    }catch (e: IllegalStateException) {
+        PhigrosBot.logger.error(e)
+    }
 }
 
 suspend inline fun CommandContext.sendMessage(block: MessageChainBuilder.() -> Unit) {
