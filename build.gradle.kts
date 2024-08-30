@@ -7,12 +7,11 @@ plugins {
 }
 
 group = "com.github.hatoyuze"
-version = "0.3.0"
+version = "0.4.0"
 
 repositories {
     if (System.getenv("CI")?.toBoolean() != true) {
         maven("https://repo.huaweicloud.com/repository/maven/")
-        maven("https://maven.aliyun.com/repository/public") // 阿里云国内代理仓库
     }
     mavenCentral()
 }
