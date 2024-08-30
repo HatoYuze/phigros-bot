@@ -26,7 +26,7 @@ object GlobalAliasLibrary : AutoSavePluginConfig("aliases") {
     fun searchSongWithAlias(name: String): List<PhigrosSongData> {
         return SONGS_DATABASE.filter {
             if (name.equals(it.sid, true)) return listOf(it)
-            if (name.length >= 2 && it.title.startsWith(name)) {
+            if (name.length >= 3 && it.title.startsWith(name, true)) {
                 return@filter true
             }
             val aliases = alias[it.sid] ?: return@filter it.title == name

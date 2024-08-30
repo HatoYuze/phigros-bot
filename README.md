@@ -37,9 +37,9 @@
 > 获取所绑定账号指定歌曲的游玩记录
 - `rank` (`/phi rank`)
 > 获取用户列表排行榜
-- `alias` (`/phi alias`)
+- `alias` (`/phi alias <曲名>` 或 `/phi song <曲名>`)
 > 获取别名对应的歌曲
-- `addAlias` (`/phi alias`)
+- `addAlias` (`/phi alias <sid> <别名>`)
 > 增加别名
 - ...
 ---
@@ -59,7 +59,7 @@
 > 格式如下(仅供参考，实际使用请保证空格的对齐):
 > ```yaml
 > alias:
->  ‘曲目 sid’:
+>  '曲目 sid':
 >   - '别名1'
 >   - '...'
 > ```

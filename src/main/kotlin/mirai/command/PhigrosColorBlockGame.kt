@@ -182,7 +182,7 @@ class PhigrosColorBlockGame private constructor(
                 }
                 val commandGroup = command.split(' ')
                 if (commandGroup.isEmpty()) {
-                    event.quote("提供的参数数量过少\n请按照以下指令格式保证参数数量的齐全:\n@机器人 开 <red> <green> <blur>\n例如: @机器人 开 31 30 51")
+                    event.quote("提供的参数数量过少\n请按照以下指令格式保证参数数量的齐全:\n@机器人 开 <red> <green> <blur>\n或: @机器人 开 随机\n例如: @机器人 开 31 30 51")
                     return false
                 }
 

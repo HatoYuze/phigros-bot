@@ -222,6 +222,31 @@ object PhiCommand : CompositeCommand(
             }
         )
     }
+
+    @SubCommand
+    suspend fun help(commandContext: CommandContext) = commandContext.run {
+        quote(
+            """
+            | Phigros-Bot 插件 帮助文档
+            | 可用指令列表:
+            |  - /phi bind <sessionToken>
+            |   > 从 sessionToken 绑定账号
+            |  - /phi rank
+            |   > 获取机器人的账号 rks 排行榜
+            |  - /phi ra <定数> <acc>
+            |   > 获取在指定条件下可获取的 ra 值
+            |  - /phi gc
+            |   > 通过逐步揭开色块猜出对应的歌曲
+            |  - /phi song <曲名>
+            |   > 获取曲目详情
+            |  - /phi aa <曲名> <别名>
+            |   > 添加别名 ${if (GlobalAliasLibrary.isNormalUserAllowed) "" else "(不可用)"}
+            |  - /phi info <曲名>
+            |   > 获取曲目的游玩记录
+            |  - /phi b19
+        """.trimMargin()
+        )
+    }
 }
 
 val CommandContext.senderId get() = sender.user?.id ?: -1
