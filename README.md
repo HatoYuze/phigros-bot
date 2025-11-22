@@ -29,6 +29,8 @@
 ---
 
 ## 指令列表
+- `help` （`/phi help`）
+> 获取帮助信息
 - `bind` (`/phi bind <sessionToken>`)
 > 绑定账号
 - `b19` (`/phi b19`)
